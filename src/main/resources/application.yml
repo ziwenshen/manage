@@ -1,13 +1,15 @@
 spring:
   application:
     name: manage
+  main:
+    allow-bean-definition-overriding: true
 
   # 数据源配置
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/manage_db
     username: postgres
-    password: password
+    password: postgres
     hikari:
       minimum-idle: 5
       maximum-pool-size: 20
