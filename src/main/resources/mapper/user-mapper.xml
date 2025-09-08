@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.server.manage.mapper.UserMapper">
-    <select id="selectById" resultType="com.server.manage.model.UserAccount" parameterType="long">
-        SELECT id, username, password, enabled, created_at FROM user_account WHERE id = #{id}
+    <select id="selectById" resultType="com.server.manage.model.User" parameterType="long">
+        SELECT id, username, password, nickname, email, phone, status, created_at, updated_at FROM user WHERE id = #{id}
     </select>
 </mapper>
