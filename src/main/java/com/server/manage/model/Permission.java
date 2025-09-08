@@ -7,6 +7,7 @@ import lombok.EqualsAndHashCode;
 
 /**
  * 权限实体类
+ * 对应数据库表: permission
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -33,19 +34,19 @@ public class Permission extends BaseEntity {
     private String module;
 
     /**
-     * 菜单或页面的唯一编码
+     * 菜单编码
      */
     @TableField("menu_code")
     private String menuCode;
 
     /**
-     * 按钮/操作
+     * 操作类型
      */
     @TableField("action")
     private String action;
 
     /**
-     * 后端接口路径
+     * URL路径
      */
     @TableField("url")
     private String url;

@@ -1,5 +1,6 @@
 package com.server.manage.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.server.manage.model.Permission;
 import com.server.manage.util.JsonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,7 +9,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
+import java.util.Collections;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * 权限Redis服务类
@@ -45,8 +48,10 @@ public class PermissionRedisService {
      */
     public void cacheUserPermissions(Long userId, Set<String> permissions) {
         String key = USER_PERMISSIONS_PREFIX + userId;
-        redisTemplate.opsForSet().add(key, permissions.toArray(new String[0]));
-        redisTemplate.expire(key, CACHE_EXPIRE_HOURS, TimeUnit.HOURS);
+        if (permissions != null && !permissions.isEmpty()) {
+            redisTemplate.opsForSet().add(key, permissions.toArray(new String[0]));
+            redisTemplate.expire(key, CACHE_EXPIRE_HOURS, TimeUnit.HOURS);
+        }
     }
 
     /**
@@ -56,7 +61,8 @@ public class PermissionRedisService {
      */
     public Set<String> getUserPermissions(Long userId) {
         String key = USER_PERMISSIONS_PREFIX + userId;
-        return redisTemplate.opsForSet().members(key);
+        Set<String> permissions = redisTemplate.opsForSet().members(key);
+        return permissions != null ? permissions : Collections.emptySet();
     }
 
     /**
@@ -78,8 +84,10 @@ public class PermissionRedisService {
      */
     public void cacheRolePermissions(Long roleId, Set<String> permissions) {
         String key = ROLE_PERMISSIONS_PREFIX + roleId;
-        redisTemplate.opsForSet().add(key, permissions.toArray(new String[0]));
-        redisTemplate.expire(key, CACHE_EXPIRE_HOURS, TimeUnit.HOURS);
+        if (permissions != null && !permissions.isEmpty()) {
+            redisTemplate.opsForSet().add(key, permissions.toArray(new String[0]));
+            redisTemplate.expire(key, CACHE_EXPIRE_HOURS, TimeUnit.HOURS);
+        }
     }
 
     /**
@@ -89,7 +97,8 @@ public class PermissionRedisService {
      */
     public Set<String> getRolePermissions(Long roleId) {
         String key = ROLE_PERMISSIONS_PREFIX + roleId;
-        return redisTemplate.opsForSet().members(key);
+        Set<String> permissions = redisTemplate.opsForSet().members(key);
+        return permissions != null ? permissions : Collections.emptySet();
     }
 
     /**
@@ -100,9 +109,11 @@ public class PermissionRedisService {
     public void cacheUserRoles(Long userId, Set<Long> roleIds) {
         String key = USER_ROLES_PREFIX + userId;
         // 将Long类型转换为String类型存储
-        Set<String> stringRoleIds = roleIds.stream().map(String::valueOf).collect(java.util.stream.Collectors.toSet());
-        redisTemplate.opsForSet().add(key, stringRoleIds.toArray(new String[0]));
-        redisTemplate.expire(key, CACHE_EXPIRE_HOURS, TimeUnit.HOURS);
+        if (roleIds != null && !roleIds.isEmpty()) {
+            Set<String> stringRoleIds = roleIds.stream().map(String::valueOf).collect(Collectors.toSet());
+            redisTemplate.opsForSet().add(key, stringRoleIds.toArray(new String[0]));
+            redisTemplate.expire(key, CACHE_EXPIRE_HOURS, TimeUnit.HOURS);
+        }
     }
 
     /**
@@ -115,9 +126,9 @@ public class PermissionRedisService {
         Set<String> stringRoleIds = redisTemplate.opsForSet().members(key);
         // 将String类型转换为Long类型返回
         if (stringRoleIds == null) {
-            return java.util.Collections.emptySet();
+            return Collections.emptySet();
         }
-        return stringRoleIds.stream().map(Long::valueOf).collect(java.util.stream.Collectors.toSet());
+        return stringRoleIds.stream().map(Long::valueOf).collect(Collectors.toSet());
     }
 
     /**
@@ -138,8 +149,30 @@ public class PermissionRedisService {
     public List<Permission> getAllPermissions() {
         String json = redisTemplate.opsForValue().get(ALL_PERMISSIONS_KEY);
         if (json != null) {
-            // 这里需要根据实际情况调整类型引用
-            // return JsonUtil.fromJson(json, new TypeReference<List<Permission>>() {});
+            return JsonUtil.fromJson(json, new TypeReference<List<Permission>>() {});
+        }
+        return null;
+    }
+
+    /**
+     * 缓存所有菜单信息
+     * @param menus 菜单列表
+     */
+    public void cacheAllMenus(List<com.server.manage.model.Menu> menus) {
+        String json = JsonUtil.toJson(menus);
+        if (json != null) {
+            redisTemplate.opsForValue().set(ALL_MENUS_KEY, json, CACHE_EXPIRE_HOURS, TimeUnit.HOURS);
+        }
+    }
+
+    /**
+     * 获取所有菜单信息
+     * @return 菜单列表
+     */
+    public List<com.server.manage.model.Menu> getAllMenus() {
+        String json = redisTemplate.opsForValue().get(ALL_MENUS_KEY);
+        if (json != null) {
+            return JsonUtil.fromJson(json, new TypeReference<List<com.server.manage.model.Menu>>() {});
         }
         return null;
     }

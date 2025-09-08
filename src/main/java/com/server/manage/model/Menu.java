@@ -7,6 +7,7 @@ import lombok.EqualsAndHashCode;
 
 /**
  * 菜单实体类
+ * 对应数据库表: menu
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -42,7 +43,7 @@ public class Menu extends BaseEntity {
      * 节点类型：1=文件夹(folder), 2=页面(page), 3=按钮(button)
      */
     @TableField("node_type")
-    private Integer nodeType;
+    private Integer nodeType = 2;
 
     /**
      * 权限编码
@@ -51,7 +52,7 @@ public class Menu extends BaseEntity {
     private String permissionCode;
 
     /**
-     * 拥有者用户ID
+     * 所有者用户ID
      */
     @TableField("owner_user_id")
     private Long ownerUserId;
@@ -60,11 +61,11 @@ public class Menu extends BaseEntity {
      * 排序
      */
     @TableField("sort_order")
-    private Integer sortOrder;
+    private Integer sortOrder = 0;
 
     /**
      * 版本号
      */
     @TableField("version")
-    private Long version;
+    private Long version = 0L;
 }

@@ -7,6 +7,7 @@ import lombok.EqualsAndHashCode;
 
 /**
  * 菜单操作实体类
+ * 对应数据库表: menu_action
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
