@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.server.manage.mapper.MenuMapper">
+
+    <resultMap id="BaseResultMap" type="com.server.manage.model.Menu">
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="menu_code" property="menuCode" />
+        <result column="module" property="module" />
+        <result column="url" property="url" />
+    </resultMap>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT id, name, menu_code, module, url FROM menu
+    </select>
+
+    <insert id="insert" parameterType="com.server.manage.model.Menu" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO menu (name, menu_code, module, url)
+        VALUES (#{name}, #{menuCode}, #{module}, #{url})
+    </insert>
+
+    <update id="update" parameterType="com.server.manage.model.Menu">
+        UPDATE menu
+        SET name = #{name}, menu_code = #{menuCode}, module = #{module}, url = #{url}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="long">
+        DELETE FROM menu WHERE id = #{id}
+    </delete>
+
+</mapper>

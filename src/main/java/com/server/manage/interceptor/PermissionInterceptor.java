@@ -11,6 +11,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Set;
 
+// 添加NonNull注解的导入
+import org.springframework.lang.NonNull;
+
 /**
  * 权限拦截器
  * 用于处理@RequiresPermissions注解的权限验证
@@ -22,7 +25,7 @@ public class PermissionInterceptor implements HandlerInterceptor {
     private PermissionRedisService permissionRedisService;
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+    public boolean preHandle(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler) throws Exception {
         // 如果不是处理方法，直接放行
         if (!(handler instanceof HandlerMethod)) {
             return true;

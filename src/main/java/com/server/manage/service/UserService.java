@@ -1,7 +1,6 @@
 package com.server.manage.service;
 
 import com.server.manage.model.User;
-import com.server.manage.model.UserRole;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

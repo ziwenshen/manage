@@ -1,7 +1,6 @@
 package com.server.manage.service;
 
 import com.server.manage.model.Role;
-import com.server.manage.model.RolePermission;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

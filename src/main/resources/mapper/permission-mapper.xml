@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.server.manage.mapper.PermissionMapper">
+
+    <!-- 映射Permission表的基础字段 -->
+    <resultMap id="BaseResultMap" type="com.server.manage.model.Permission">
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="code" property="code" />
+        <result column="description" property="description" />
+        <result column="created_at" property="createdAt" />
+    </resultMap>
+
+    <select id="selectById" resultMap="BaseResultMap" parameterType="long">
+        SELECT id, name, code, description, created_at
+        FROM permission
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT id, name, code, description, created_at
+        FROM permission
+    </select>
+
+    <select id="selectByIds" resultMap="BaseResultMap" parameterType="java.util.Set">
+        SELECT id, name, code, description, created_at
+        FROM permission
+        WHERE id IN
+        <foreach item="id" collection="ids" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <insert id="insert" parameterType="com.server.manage.model.Permission" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO permission (name, code, description, created_at)
+        VALUES (#{name}, #{code}, #{description}, now())
+    </insert>
+
+    <update id="update" parameterType="com.server.manage.model.Permission">
+        UPDATE permission
+        SET name = #{name}, code = #{code}, description = #{description}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="long">
+        DELETE FROM permission WHERE id = #{id}
+    </delete>
+
+</mapper>
