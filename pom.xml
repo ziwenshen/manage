@@ -55,12 +55,6 @@
 			<groupId>com.baomidou</groupId>
 			<artifactId>mybatis-plus-spring-boot3-starter</artifactId>
 			<version>3.5.5</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.mybatis</groupId>
-					<artifactId>mybatis-spring</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 
 	<!-- rely on starter to bring compatible mybatis-spring; avoid explicit mybatis-spring without version -->
@@ -70,6 +64,12 @@
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 			<version>42.6.0</version>
+		</dependency>
+
+		<!-- Redis (Lettuce) for caching permissions -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-redis</artifactId>
 		</dependency>
 
 
