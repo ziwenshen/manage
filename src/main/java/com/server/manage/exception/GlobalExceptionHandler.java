@@ -1,5 +1,6 @@
 package com.server.manage.exception;
 
+import com.server.manage.common.ApiCode;
 import com.server.manage.common.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
@@ -19,8 +20,8 @@ public class GlobalExceptionHandler {
         String msg = ex.getBindingResult().getFieldErrors().stream()
                 .map(FieldError::getDefaultMessage)
                 .collect(Collectors.joining("; "));
-        if (msg == null || msg.isEmpty()) msg = "validation error";
-        return ApiResponse.error(HttpStatus.BAD_REQUEST.value(), msg);
+        if (msg == null || msg.isEmpty()) msg = "参数校验失败";
+        return ApiResponse.error(ApiCode.VALIDATION_ERROR, msg);
     }
 
     @ExceptionHandler(BusinessException.class)
@@ -33,6 +34,6 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ApiResponse<String> handleException(Exception ex) {
         // simple handler; in real project log the exception
-        return ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "internal error");
+        return ApiResponse.error(ApiCode.INTERNAL_SERVER_ERROR, "服务器内部错误");
     }
 }

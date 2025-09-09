@@ -67,3 +67,7 @@ logging:
     "[com.baomidou.mybatisplus]": debug
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{50} - %msg%n"
+
+# 数据库时区配置，解决 PostgreSQL TIMESTAMPTZ 到 Java LocalDateTime 的转换问题
+database:
+  timezone: GMT+8

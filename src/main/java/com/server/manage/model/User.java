@@ -1,18 +1,27 @@
 package com.server.manage.model;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
+
+import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
  * 用户实体类
  */
 @Data
-@EqualsAndHashCode(callSuper = true)
 @TableName("user")
-public class User extends BaseEntity {
+public class User implements Serializable {
     private static final long serialVersionUID = 1L;
+
+    /**
+     * 主键ID
+     */
+    @TableId(value = "id", type = IdType.AUTO)
+    private Long id;
 
     /**
      * 用户名
@@ -27,26 +36,14 @@ public class User extends BaseEntity {
     private String password;
 
     /**
-     * 昵称
+     * 是否启用 true-启用 false-禁用
      */
-    @TableField("nickname")
-    private String nickname;
+    @TableField("enabled")
+    private Boolean enabled = true;
 
     /**
-     * 邮箱
+     * 创建时间
      */
-    @TableField("email")
-    private String email;
-
-    /**
-     * 手机号
-     */
-    @TableField("phone")
-    private String phone;
-
-    /**
-     * 状态 0-禁用 1-启用
-     */
-    @TableField("status")
-    private Integer status = 1;
+    @TableField("created_at")
+    private LocalDateTime createdAt;
 }
