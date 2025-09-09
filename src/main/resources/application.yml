@@ -7,7 +7,7 @@ spring:
   # 数据源配置
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/manage_db
+    url: jdbc:postgresql://localhost:5432/manage_db?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=utf8
     username: postgres
     password: postgres
     hikari:
@@ -25,6 +25,25 @@ spring:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
     default-property-inclusion: NON_NULL
+
+  # Thymeleaf配置
+  thymeleaf:
+    check-template-location: false
+
+  # Redis配置
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: 
+      database: 0
+      timeout: 5000ms
+      lettuce:
+        pool:
+          max-active: 20
+          max-wait: -1ms
+          max-idle: 10
+          min-idle: 2
 
 # MyBatis-Plus配置
 mybatis-plus:
@@ -52,7 +71,10 @@ mybatis-plus:
   # Mapper XML文件位置
   mapper-locations: classpath*:/mapper/**/*.xml
   # 实体类包路径
-  type-aliases-package: com.mes.manage.entity
+  type-aliases-package: com.server.manage.model
+  
+  # TypeHandler配置
+  type-handlers-package: com.server.manage.config
 
 # 服务器配置
 server:
@@ -65,9 +87,17 @@ logging:
   level:
     "[com.mes.manage]": debug
     "[com.baomidou.mybatisplus]": debug
+    "[org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer]": error
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{50} - %msg%n"
 
 # 数据库时区配置，解决 PostgreSQL TIMESTAMPTZ 到 Java LocalDateTime 的转换问题
 database:
   timezone: GMT+8
+
+# JWT配置
+jwt:
+  # JWT密钥 (建议使用更复杂的密钥)
+  secret: mySecretKey123456789012345678901234567890123456789012345678901234567890
+  # token过期时间，单位秒 (24小时)
+  expiration: 86400

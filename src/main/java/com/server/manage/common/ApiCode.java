@@ -11,7 +11,7 @@ public final class ApiCode {
     }
 
     // 成功状态码
-    public static final int SUCCESS = 0;
+    public static final int SUCCESS = 200;
 
     // 客户端错误状态码 (4xx)
     public static final int BAD_REQUEST = 400;           // 请求参数错误

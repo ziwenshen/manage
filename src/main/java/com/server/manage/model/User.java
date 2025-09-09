@@ -44,6 +44,6 @@ public class User implements Serializable {
     /**
      * 创建时间
      */
-    @TableField("created_at")
+    @TableField(value = "created_at", typeHandler = com.server.manage.config.PostgreSqlLocalDateTimeTypeHandler.class)
     private LocalDateTime createdAt;
 }
