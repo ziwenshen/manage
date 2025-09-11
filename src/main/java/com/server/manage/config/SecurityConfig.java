@@ -35,7 +35,7 @@ public class SecurityConfig {
         http
                 // 禁用CSRF保护
                 .csrf(AbstractHttpConfigurer::disable)
-                配置请求授权
+                //配置请求授权
                 .authorizeHttpRequests(authz -> authz
                         // 允许登录接口无需认证
                         .requestMatchers("/auth/login", "/auth/register").permitAll()
