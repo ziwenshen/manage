@@ -8,9 +8,9 @@ import com.server.manage.exception.BusinessException;
 import com.server.manage.mapper.UserMapper;
 import com.server.manage.model.User;
 import com.server.manage.service.IUserService;
-import com.server.manage.util.PasswordUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -24,6 +24,8 @@ public class UserServiceImpl implements IUserService {
 
     @Autowired
     private UserMapper userMapper;
+    
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Override
     @Transactional
@@ -37,14 +39,14 @@ public class UserServiceImpl implements IUserService {
         }
 
         // 检查用户名是否已存在
-        // if (userMapper.existsByUsername(request.getUsername())) {
-        //     throw new BusinessException("用户名已存在");
-        // }
+        if (userMapper.existsByUsername(request.getUsername())) {
+            throw new BusinessException("用户名已存在");
+        }
 
         // 创建用户实体
         User user = new User();
         user.setUsername(request.getUsername());
-        user.setPassword(PasswordUtil.encode(request.getPassword()));
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setEnabled(request.getEnabled() != null ? request.getEnabled() : true);
         user.setCreatedAt(LocalDateTime.now());
 
@@ -104,7 +106,7 @@ public class UserServiceImpl implements IUserService {
         user.setId(id);
         
         if (StringUtils.hasText(request.getPassword())) {
-            user.setPassword(PasswordUtil.encode(request.getPassword()));
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
         }
         
         if (request.getEnabled() != null) {

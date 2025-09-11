@@ -35,12 +35,10 @@ public class SecurityConfig {
         http
                 // 禁用CSRF保护
                 .csrf(AbstractHttpConfigurer::disable)
-                // 配置请求授权
+                配置请求授权
                 .authorizeHttpRequests(authz -> authz
                         // 允许登录接口无需认证
                         .requestMatchers("/auth/login", "/auth/register").permitAll()
-                        // 允许健康检查接口
-                        .requestMatchers("/actuator/**").permitAll()
                         // 其他所有请求都需要认证
                         .anyRequest().authenticated()
                 )

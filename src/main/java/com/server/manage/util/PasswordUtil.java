@@ -6,7 +6,8 @@ import java.security.SecureRandom;
 import java.util.Base64;
 
 /**
- * 密码加密工具类
+ * 密码加密工具类 (SHA-256 + Salt)
+ * 用于兼容旧版本密码验证
  */
 public class PasswordUtil {
     
@@ -58,8 +59,8 @@ public class PasswordUtil {
             String computedHash = Base64.getEncoder().encodeToString(hash);
             
             return storedHash.equals(computedHash);
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("密码验证失败", e);
+        } catch (Exception e) {
+            return false;
         }
     }
 }
