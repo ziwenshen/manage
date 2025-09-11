@@ -2,39 +2,34 @@ package com.server.manage.util;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.util.Base64;
+import java.nio.charset.StandardCharsets;
 
 /**
- * 密码加密工具类 (SHA-256 + Salt)
- * 用于兼容旧版本密码验证
+ * 密码加密工具类 (简单SHA-256加密)
+ * 使用Java自带的简单加密方式
  */
 public class PasswordUtil {
     
     private static final String ALGORITHM = "SHA-256";
-    private static final int SALT_LENGTH = 16;
-
-    /**
-     * 生成随机盐值
-     */
-    public static String generateSalt() {
-        SecureRandom random = new SecureRandom();
-        byte[] salt = new byte[SALT_LENGTH];
-        random.nextBytes(salt);
-        return Base64.getEncoder().encodeToString(salt);
-    }
 
     /**
      * 加密密码
      */
     public static String encode(String rawPassword) {
         try {
-            String salt = generateSalt();
             MessageDigest digest = MessageDigest.getInstance(ALGORITHM);
-            digest.update(salt.getBytes());
-            byte[] hash = digest.digest(rawPassword.getBytes());
-            String encodedHash = Base64.getEncoder().encodeToString(hash);
-            return salt + ":" + encodedHash;
+            byte[] hash = digest.digest(rawPassword.getBytes(StandardCharsets.UTF_8));
+            
+            // 将字节数组转换为十六进制字符串
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) {
+                    hexString.append('0');
+                }
+                hexString.append(hex);
+            }
+            return hexString.toString();
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException("密码加密失败", e);
         }
@@ -44,23 +39,6 @@ public class PasswordUtil {
      * 验证密码
      */
     public static boolean matches(String rawPassword, String encodedPassword) {
-        try {
-            String[] parts = encodedPassword.split(":");
-            if (parts.length != 2) {
-                return false;
-            }
-            
-            String salt = parts[0];
-            String storedHash = parts[1];
-            
-            MessageDigest digest = MessageDigest.getInstance(ALGORITHM);
-            digest.update(salt.getBytes());
-            byte[] hash = digest.digest(rawPassword.getBytes());
-            String computedHash = Base64.getEncoder().encodeToString(hash);
-            
-            return storedHash.equals(computedHash);
-        } catch (Exception e) {
-            return false;
-        }
+        return encode(rawPassword).equals(encodedPassword);
     }
 }
