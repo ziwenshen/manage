@@ -5,8 +5,11 @@ import com.server.manage.dto.auth.LoginResponse;
 import com.server.manage.dto.user.UserResponse;
 import com.server.manage.service.IAuthService;
 import com.server.manage.service.IUserService;
+import com.server.manage.service.IPermissionService;
 import com.server.manage.service.JwtSessionService;
 import com.server.manage.util.JwtTokenUtil;
+import com.server.manage.mapper.UserRoleMapper;
+import com.server.manage.mapper.RoleMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +18,11 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 认证服务实现类
@@ -29,6 +37,9 @@ public class AuthService implements IAuthService {
     private final UserDetailsService userDetailsService;
     private final IUserService userService;
     private final JwtSessionService jwtSessionService;
+    private final IPermissionService permissionService;
+    private final UserRoleMapper userRoleMapper;
+    private final RoleMapper roleMapper;
 
     @Value("${jwt.expiration}")
     private Long jwtExpiration;
@@ -55,14 +66,64 @@ public class AuthService implements IAuthService {
         // 保存会话信息到Redis
         jwtSessionService.saveSession(user, accessToken, "Web Client");
 
-        log.info("用户登录成功: {}", request.getUsername());
+        // 构建完整的登录响应
+        LoginResponse response = buildCompleteLoginResponse(user, accessToken, null);
 
-        // 构建登录响应
+        log.info("用户登录成功: {}, 权限数: {}, 角色数: {}", 
+                request.getUsername(), 
+                response.getPermissionInfo().getPermissions() != null ? response.getPermissionInfo().getPermissions().size() : 0,
+                response.getPermissionInfo().getRoleIds() != null ? response.getPermissionInfo().getRoleIds().size() : 0);
+
+        return response;
+    }
+
+    /**
+     * 构建完整的登录响应
+     */
+    private LoginResponse buildCompleteLoginResponse(UserResponse user, String accessToken, String clientIp) {
+        // 构建用户基本信息
+        LoginResponse.UserInfo userInfo = new LoginResponse.UserInfo(
+                user.getId(),
+                user.getUsername(),
+                user.getEnabled(),
+                user.getCreatedAt()
+        );
+
+        // 获取用户权限信息
+        Set<String> permissions = permissionService.loadUserPermissions(user.getId());
+        Set<Long> roleIds = userRoleMapper.selectRoleIdsByUserId(user.getId());
+        List<String> roleNames = roleIds.stream()
+                .map(roleId -> {
+                    try {
+                        return roleMapper.selectById(roleId).getName();
+                    } catch (Exception e) {
+                        return "未知角色";
+                    }
+                })
+                .collect(Collectors.toList());
+
+        LoginResponse.PermissionInfo permissionInfo = new LoginResponse.PermissionInfo(
+                roleIds,
+                roleNames,
+                permissions,
+                null // menus，如果需要可以添加菜单查询逻辑
+        );
+
+        // 构建登录状态信息
+        LoginResponse.LoginStatusInfo loginStatusInfo = new LoginResponse.LoginStatusInfo(
+                LocalDateTime.now(),
+                clientIp,
+                "Web Client",
+                accessToken.substring(0, Math.min(10, accessToken.length())) + "..."
+        );
+
         return new LoginResponse(
                 accessToken,
+                "Bearer",
                 jwtExpiration,
-                user.getUsername(),
-                user.getId()
+                userInfo,
+                permissionInfo,
+                loginStatusInfo
         );
     }
 

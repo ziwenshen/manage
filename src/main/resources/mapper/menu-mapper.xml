@@ -10,36 +10,36 @@
         <result column="module" property="module" />
         <result column="node_type" property="nodeType" />
         <result column="sort_order" property="sortOrder" />
-        <result column="created_at" property="createdAt" />
+        <result column="created_at" property="createdAt" typeHandler="com.server.manage.config.PostgreSqlLocalDateTimeTypeHandler"/>
     </resultMap>
 
     <select id="selectAll" resultMap="BaseResultMap">
-        SELECT id, parent_id, menu_code, name, module, node_type, sort_order, created_at 
+        SELECT id, parent_id, menu_code, name, module, node_type, sort_order, created_at::timestamp as created_at
         FROM menu 
         ORDER BY sort_order, id
     </select>
 
     <select id="selectById" resultMap="BaseResultMap">
-        SELECT id, parent_id, menu_code, name, module, node_type, sort_order, created_at 
+        SELECT id, parent_id, menu_code, name, module, node_type, sort_order, created_at::timestamp as created_at
         FROM menu 
         WHERE id = #{id}
     </select>
 
     <select id="selectByParentId" resultMap="BaseResultMap">
-        SELECT id, parent_id, menu_code, name, module, node_type, sort_order, created_at 
+        SELECT id, parent_id, menu_code, name, module, node_type, sort_order, created_at::timestamp as created_at
         FROM menu 
         WHERE parent_id = #{parentId}
         ORDER BY sort_order, id
     </select>
 
     <select id="selectByMenuCode" resultMap="BaseResultMap">
-        SELECT id, parent_id, menu_code, name, module, node_type, sort_order, created_at 
+        SELECT id, parent_id, menu_code, name, module, node_type, sort_order, created_at::timestamp as created_at
         FROM menu 
         WHERE menu_code = #{menuCode}
     </select>
 
     <select id="selectByModule" resultMap="BaseResultMap">
-        SELECT id, parent_id, menu_code, name, module, node_type, sort_order, created_at 
+        SELECT id, parent_id, menu_code, name, module, node_type, sort_order, created_at::timestamp as created_at
         FROM menu 
         WHERE module = #{module}
         ORDER BY sort_order, id

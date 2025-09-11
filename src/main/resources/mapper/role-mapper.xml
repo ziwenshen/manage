@@ -7,16 +7,17 @@
         <result column="name" property="name" />
         <result column="code" property="code" />
         <result column="description" property="description" />
+        <result column="created_at" property="createdAt" typeHandler="com.server.manage.config.PostgreSqlLocalDateTimeTypeHandler"/>
     </resultMap>
 
     <select id="selectById" resultMap="BaseResultMap" parameterType="long">
-        SELECT id, name, code, description
+        SELECT id, name, code, description, created_at::timestamp as created_at
         FROM role
         WHERE id = #{id}
     </select>
 
     <select id="selectAll" resultMap="BaseResultMap">
-        SELECT id, name, code, description
+        SELECT id, name, code, description, created_at::timestamp as created_at
         FROM role
     </select>
 

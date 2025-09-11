@@ -5,25 +5,28 @@
     <!-- 映射Permission表的基础字段 -->
     <resultMap id="BaseResultMap" type="com.server.manage.model.Permission">
         <id column="id" property="id" />
-        <result column="name" property="name" />
         <result column="code" property="code" />
-        <result column="description" property="description" />
-        <result column="created_at" property="createdAt" />
+        <result column="name" property="name" />
+        <result column="module" property="module" />
+        <result column="menu_code" property="menuCode" />
+        <result column="action" property="action" />
+        <result column="url" property="url" />
+        <result column="created_at" property="createdAt" typeHandler="com.server.manage.config.PostgreSqlLocalDateTimeTypeHandler"/>
     </resultMap>
 
     <select id="selectById" resultMap="BaseResultMap" parameterType="long">
-        SELECT id, name, code, description, created_at
+        SELECT id, code, name, module, menu_code, action, url, created_at::timestamp as created_at
         FROM permission
         WHERE id = #{id}
     </select>
 
     <select id="selectAll" resultMap="BaseResultMap">
-        SELECT id, name, code, description, created_at
+        SELECT id, code, name, module, menu_code, action, url, created_at::timestamp as created_at
         FROM permission
     </select>
 
     <select id="selectByIds" resultMap="BaseResultMap" parameterType="java.util.Set">
-        SELECT id, name, code, description, created_at
+        SELECT id, code, name, module, menu_code, action, url, created_at::timestamp as created_at
         FROM permission
         WHERE id IN
         <foreach item="id" collection="ids" open="(" separator="," close=")">
@@ -32,13 +35,13 @@
     </select>
 
     <insert id="insert" parameterType="com.server.manage.model.Permission" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO permission (name, code, description, created_at)
-        VALUES (#{name}, #{code}, #{description}, now())
+        INSERT INTO permission (code, name, module, menu_code, action, url, created_at)
+        VALUES (#{code}, #{name}, #{module}, #{menuCode}, #{action}, #{url}, now())
     </insert>
 
     <update id="update" parameterType="com.server.manage.model.Permission">
         UPDATE permission
-        SET name = #{name}, code = #{code}, description = #{description}
+        SET code = #{code}, name = #{name}, module = #{module}, menu_code = #{menuCode}, action = #{action}, url = #{url}
         WHERE id = #{id}
     </update>
 
