@@ -46,26 +46,8 @@ public class Menu extends BaseEntity {
     private Integer nodeType = 2;
 
     /**
-     * 权限编码
-     */
-    @TableField("permission_code")
-    private String permissionCode;
-
-    /**
-     * 所有者用户ID
-     */
-    @TableField("owner_user_id")
-    private Long ownerUserId;
-
-    /**
      * 排序
      */
     @TableField("sort_order")
     private Integer sortOrder = 0;
-
-    /**
-     * 版本号
-     */
-    @TableField("version")
-    private Long version = 0L;
 }

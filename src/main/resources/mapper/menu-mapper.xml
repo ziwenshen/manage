@@ -4,29 +4,69 @@
 
     <resultMap id="BaseResultMap" type="com.server.manage.model.Menu">
         <id column="id" property="id" />
-        <result column="name" property="name" />
+        <result column="parent_id" property="parentId" />
         <result column="menu_code" property="menuCode" />
+        <result column="name" property="name" />
         <result column="module" property="module" />
-        <result column="url" property="url" />
+        <result column="node_type" property="nodeType" />
+        <result column="sort_order" property="sortOrder" />
+        <result column="created_at" property="createdAt" />
     </resultMap>
 
     <select id="selectAll" resultMap="BaseResultMap">
-        SELECT id, name, menu_code, module, url FROM menu
+        SELECT id, parent_id, menu_code, name, module, node_type, sort_order, created_at 
+        FROM menu 
+        ORDER BY sort_order, id
+    </select>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT id, parent_id, menu_code, name, module, node_type, sort_order, created_at 
+        FROM menu 
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectByParentId" resultMap="BaseResultMap">
+        SELECT id, parent_id, menu_code, name, module, node_type, sort_order, created_at 
+        FROM menu 
+        WHERE parent_id = #{parentId}
+        ORDER BY sort_order, id
+    </select>
+
+    <select id="selectByMenuCode" resultMap="BaseResultMap">
+        SELECT id, parent_id, menu_code, name, module, node_type, sort_order, created_at 
+        FROM menu 
+        WHERE menu_code = #{menuCode}
+    </select>
+
+    <select id="selectByModule" resultMap="BaseResultMap">
+        SELECT id, parent_id, menu_code, name, module, node_type, sort_order, created_at 
+        FROM menu 
+        WHERE module = #{module}
+        ORDER BY sort_order, id
     </select>
 
     <insert id="insert" parameterType="com.server.manage.model.Menu" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO menu (name, menu_code, module, url)
-        VALUES (#{name}, #{menuCode}, #{module}, #{url})
+        INSERT INTO menu (parent_id, menu_code, name, module, node_type, sort_order, created_at)
+        VALUES (#{parentId}, #{menuCode}, #{name}, #{module}, #{nodeType}, #{sortOrder}, #{createdAt})
     </insert>
 
     <update id="update" parameterType="com.server.manage.model.Menu">
         UPDATE menu
-        SET name = #{name}, menu_code = #{menuCode}, module = #{module}, url = #{url}
+        SET parent_id = #{parentId}, 
+            menu_code = #{menuCode}, 
+            name = #{name}, 
+            module = #{module}, 
+            node_type = #{nodeType}, 
+            sort_order = #{sortOrder}
         WHERE id = #{id}
     </update>
 
     <delete id="deleteById" parameterType="long">
         DELETE FROM menu WHERE id = #{id}
+    </delete>
+
+    <delete id="deleteByParentId" parameterType="long">
+        DELETE FROM menu WHERE parent_id = #{parentId}
     </delete>
 
 </mapper>
