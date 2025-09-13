@@ -49,4 +49,16 @@
         DELETE FROM permission WHERE id = #{id}
     </delete>
 
+        <!-- 查询用户有view权限的菜单（文件夹或界面） -->
+        <select id="selectUserMenusWithViewPermission" resultType="java.util.Map" parameterType="long">
+            SELECT DISTINCT m.id, m.menu_code, m.name, m.module, m.node_type, m.sort_order, m.created_at::timestamp as created_at, m.parent_id
+                FROM menu m
+                INNER JOIN permission p ON m.menu_code = p.menu_code
+                INNER JOIN role_permission rp ON p.id = rp.permission_id
+                INNER JOIN user_role ur ON rp.role_id = ur.role_id
+                WHERE ur.user_id = #{userId}
+                    AND p.action = 'view'
+                    AND m.node_type IN (1, 2)
+                ORDER BY m.sort_order, m.id
+        </select>
 </mapper>

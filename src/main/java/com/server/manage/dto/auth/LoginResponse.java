@@ -112,10 +112,10 @@ public class LoginResponse {
          */
         private Set<String> permissions;
         
-        /**
-         * 用户可访问的菜单列表（如果需要）
-         */
-        private List<String> menus;
+    /**
+     * 用户可访问的菜单列表（如果需要）
+     */
+    private List<com.server.manage.dto.menu.MenuResponse> menus;
     }
     
     /**

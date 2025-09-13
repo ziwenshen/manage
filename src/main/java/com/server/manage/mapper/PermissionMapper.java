@@ -23,4 +23,9 @@ public interface PermissionMapper {
     int update(Permission permission);
 
     int deleteById(@Param("id") Long id);
+
+    /**
+     * 查询用户有view权限的菜单（文件夹或界面）
+     */
+    List<java.util.Map<String, Object>> selectUserMenusWithViewPermission(@Param("userId") Long userId);
 }

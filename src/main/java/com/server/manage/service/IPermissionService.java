@@ -39,6 +39,11 @@ public interface IPermissionService {
     void delete(Long id);
 
     /**
+     * 查询用户有view权限的菜单（文件夹或界面），并组装为树结构
+     */
+    List<com.server.manage.dto.menu.MenuResponse> getUserMenusWithViewPermission(Long userId);
+
+    /**
      * 按用户ID加载该用户的权限集合，优先从缓存读取
      * @param userId 用户ID
      * @return 权限字符串集合

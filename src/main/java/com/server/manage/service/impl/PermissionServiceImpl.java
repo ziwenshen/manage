@@ -38,9 +38,48 @@ public class PermissionServiceImpl implements IPermissionService {
     @Override
     public List<Permission> listAll() {
         List<Permission> permissions = permissionMapper.selectAll();
-        // update cache
-        permissionRedisService.cacheAllPermissions(permissions);
         return permissions;
+    }
+
+    /**
+     * 查询用户有view权限的菜单（文件夹或界面），并组装为树结构
+     */
+    @Override
+    public List<com.server.manage.dto.menu.MenuResponse> getUserMenusWithViewPermission(Long userId) {
+        List<java.util.Map<String, Object>> menuData = permissionMapper.selectUserMenusWithViewPermission(userId);
+        // 转换为MenuResponse对象
+        java.util.Map<Long, com.server.manage.dto.menu.MenuResponse> menuMap = new java.util.HashMap<>();
+        for (java.util.Map<String, Object> data : menuData) {
+            Long id = ((Number)data.get("id")).longValue();
+            com.server.manage.dto.menu.MenuResponse menu = new com.server.manage.dto.menu.MenuResponse();
+            menu.setId(id);
+            menu.setMenuCode((String)data.get("menu_code"));
+            menu.setName((String)data.get("name"));
+            menu.setModule((String)data.get("module"));
+            menu.setNodeType(data.get("node_type") == null ? null : ((Number)data.get("node_type")).intValue());
+            menu.setSortOrder(data.get("sort_order") == null ? null : ((Number)data.get("sort_order")).intValue());
+            Object createdAtObj = data.get("created_at");
+            if (createdAtObj instanceof java.sql.Timestamp) {
+                menu.setCreatedAt(((java.sql.Timestamp) createdAtObj).toLocalDateTime());
+            } else if (createdAtObj instanceof java.time.LocalDateTime) {
+                menu.setCreatedAt((java.time.LocalDateTime) createdAtObj);
+            } else {
+                menu.setCreatedAt(null);
+            }
+            menu.setParentId(data.get("parent_id") == null ? null : ((Number)data.get("parent_id")).longValue());
+            menu.setChildren(new java.util.ArrayList<>());
+            menuMap.put(id, menu);
+        }
+        // 构建树结构
+        List<com.server.manage.dto.menu.MenuResponse> roots = new java.util.ArrayList<>();
+        for (com.server.manage.dto.menu.MenuResponse menu : menuMap.values()) {
+            if (menu.getParentId() == null || !menuMap.containsKey(menu.getParentId())) {
+                roots.add(menu);
+            } else {
+                menuMap.get(menu.getParentId()).getChildren().add(menu);
+            }
+        }
+        return roots;
     }
 
     @Override

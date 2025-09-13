@@ -102,11 +102,15 @@ public class AuthService implements IAuthService {
                 })
                 .collect(Collectors.toList());
 
+
+        // 查询用户有view权限的菜单（文件夹或界面）
+        List<com.server.manage.dto.menu.MenuResponse> menus = permissionService.getUserMenusWithViewPermission(user.getId());
+
         LoginResponse.PermissionInfo permissionInfo = new LoginResponse.PermissionInfo(
                 roleIds,
                 roleNames,
                 permissions,
-                null // menus，如果需要可以添加菜单查询逻辑
+                menus
         );
 
         // 构建登录状态信息
