@@ -1,6 +1,8 @@
 package com.server.manage.interceptor;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.server.manage.annotation.HasPermission;
+import com.server.manage.common.ApiResponse;
 import com.server.manage.security.CustomPermissionEvaluator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +14,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.lang.reflect.Method;
 
 /**
@@ -24,6 +27,7 @@ import java.lang.reflect.Method;
 public class NewPermissionInterceptor implements HandlerInterceptor {
 
     private final CustomPermissionEvaluator permissionEvaluator;
+    private final ObjectMapper objectMapper;
 
     @Override
     public boolean preHandle(@org.springframework.lang.NonNull HttpServletRequest request, 
@@ -96,13 +100,14 @@ public class NewPermissionInterceptor implements HandlerInterceptor {
             if (!hasAccess) {
                 String permissionStr = String.join(", ", permissions);
                 String logicalStr = hasPermission.logical().name();
-                String description = hasPermission.description().isEmpty() ? 
+                String description = hasPermission.description().isEmpty() ?
                     "访问方法: " + method.getName() : hasPermission.description();
-                
-                log.warn("权限不足 - 用户: {}, 需要权限: {} ({}), 描述: {}", 
+
+                log.warn("权限不足 - 用户: {}, 需要权限: {} ({}), 描述: {}",
                     authentication.getName(), permissionStr, logicalStr, description);
-                
-                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+
+                // 返回标准的JSON错误响应
+                writeErrorResponse(response, permissionStr, description);
                 return false;
             }
 
@@ -111,8 +116,31 @@ public class NewPermissionInterceptor implements HandlerInterceptor {
 
         } catch (Exception e) {
             log.error("权限检查异常: {}", e.getMessage(), e);
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            writeErrorResponse(response, "系统错误", "权限检查时发生异常");
             return false;
+        }
+    }
+
+    /**
+     * 写入错误响应
+     * @param response HTTP响应
+     * @param permission 缺失的权限（仅用于日志，不返回给客户端）
+     * @param description 描述
+     */
+    private void writeErrorResponse(HttpServletResponse response, String permission, String description) {
+        try {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.setContentType("application/json;charset=UTF-8");
+
+            // 不暴露具体权限信息，只返回通用的权限不足提示
+            ApiResponse<Object> errorResponse = ApiResponse.error("权限不足，无法执行此操作");
+
+            String jsonResponse = objectMapper.writeValueAsString(errorResponse);
+            response.getWriter().write(jsonResponse);
+            response.getWriter().flush();
+
+        } catch (IOException e) {
+            log.error("写入错误响应失败: {}", e.getMessage(), e);
         }
     }
 }
