@@ -4,8 +4,10 @@ import com.server.manage.dto.user.UserCreateRequest;
 import com.server.manage.dto.user.UserUpdateRequest;
 import com.server.manage.dto.user.UserQueryRequest;
 import com.server.manage.dto.user.UserResponse;
+import com.server.manage.dto.user.UserRoleAssignRequest;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * 用户服务接口
@@ -51,4 +53,14 @@ public interface IUserService {
      * 检查用户名是否存在
      */
     boolean existsByUsername(String username);
+
+    /**
+     * 获取用户的角色ID列表
+     */
+    Set<Long> getUserRoles(Long userId);
+
+    /**
+     * 分配用户角色
+     */
+    void assignUserRoles(Long userId, UserRoleAssignRequest request);
 }

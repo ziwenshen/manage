@@ -4,9 +4,13 @@ import com.server.manage.dto.user.UserCreateRequest;
 import com.server.manage.dto.user.UserUpdateRequest;
 import com.server.manage.dto.user.UserQueryRequest;
 import com.server.manage.dto.user.UserResponse;
+import com.server.manage.dto.user.UserRoleAssignRequest;
 import com.server.manage.exception.BusinessException;
 import com.server.manage.mapper.UserMapper;
+import com.server.manage.mapper.UserRoleMapper;
+import com.server.manage.mapper.UserRoleWriteMapper;
 import com.server.manage.model.User;
+import com.server.manage.service.IPermissionService;
 import com.server.manage.service.IUserService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +21,7 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,9 +29,18 @@ public class UserServiceImpl implements IUserService {
 
     @Autowired
     private UserMapper userMapper;
-    
+
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private UserRoleMapper userRoleMapper;
+
+    @Autowired
+    private UserRoleWriteMapper userRoleWriteMapper;
+
+    @Autowired
+    private IPermissionService permissionService;
 
     @Override
     @Transactional
@@ -179,6 +193,50 @@ public class UserServiceImpl implements IUserService {
             return false;
         }
         return userMapper.existsByUsername(username);
+    }
+
+    @Override
+    public Set<Long> getUserRoles(Long userId) {
+        if (userId == null) {
+            throw new BusinessException("用户ID不能为空");
+        }
+
+        // 检查用户是否存在
+        User user = userMapper.selectById(userId);
+        if (user == null) {
+            throw new BusinessException("用户不存在");
+        }
+
+        return userRoleMapper.selectRoleIdsByUserId(userId);
+    }
+
+    @Override
+    @Transactional
+    public void assignUserRoles(Long userId, UserRoleAssignRequest request) {
+        if (userId == null) {
+            throw new BusinessException("用户ID不能为空");
+        }
+
+        if (request == null || request.getRoleIds() == null) {
+            throw new BusinessException("角色ID列表不能为空");
+        }
+
+        // 检查用户是否存在
+        User user = userMapper.selectById(userId);
+        if (user == null) {
+            throw new BusinessException("用户不存在");
+        }
+
+        // 1. 删除用户原有的角色关联
+        userRoleWriteMapper.deleteByUserId(userId);
+
+        // 2. 如果有新的角色，批量插入
+        if (!request.getRoleIds().isEmpty()) {
+            userRoleWriteMapper.batchInsert(userId, request.getRoleIds());
+        }
+
+        // 3. 刷新用户权限缓存
+        permissionService.refreshUserPermissions(userId);
     }
 
     /**

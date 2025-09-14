@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * 用户管理控制器
@@ -95,5 +96,25 @@ public class UserController {
     public ApiResponse<Boolean> existsByUsername(@PathVariable String username) {
         boolean exists = userService.existsByUsername(username);
         return ApiResponse.ok(exists);
+    }
+
+    /**
+     * 获取用户的角色列表
+     */
+    @HasPermission(value = "menu:user:view", description = "查看用户角色")
+    @GetMapping("/{userId}/roles")
+    public ApiResponse<Set<Long>> getUserRoles(@PathVariable Long userId) {
+        Set<Long> roleIds = userService.getUserRoles(userId);
+        return ApiResponse.ok(roleIds);
+    }
+
+    /**
+     * 分配用户角色
+     */
+    @HasPermission(value = "menu:user:assignrole", description = "分配用户角色")
+    @PostMapping("/{userId}/roles")
+    public ApiResponse<String> assignUserRoles(@PathVariable Long userId, @RequestBody UserRoleAssignRequest request) {
+        userService.assignUserRoles(userId, request);
+        return ApiResponse.ok("用户角色分配成功");
     }
 }
