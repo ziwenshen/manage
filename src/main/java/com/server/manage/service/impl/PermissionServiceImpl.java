@@ -1,15 +1,20 @@
 package com.server.manage.service.impl;
 
+import com.server.manage.dto.menu.MenuPermissionTreeResponse;
 import com.server.manage.mapper.PermissionMapper;
+import com.server.manage.model.Menu;
 import com.server.manage.model.Permission;
+import com.server.manage.service.IMenuService;
 import com.server.manage.service.IPermissionService;
 import com.server.manage.service.PermissionRedisService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -29,6 +34,9 @@ public class PermissionServiceImpl implements IPermissionService {
 
     @Autowired
     private com.server.manage.mapper.UserPermissionMapper userPermissionMapper;
+
+    @Autowired
+    private IMenuService menuService;
 
     @Override
     public Permission getById(Long id) {
@@ -158,5 +166,93 @@ public class PermissionServiceImpl implements IPermissionService {
         // 重新加载并刷新缓存（占位实现）
         permissionRedisService.removeUserPermissionsCache(userId);
         loadUserPermissions(userId);
+    }
+
+    @Override
+    public List<MenuPermissionTreeResponse> getMenuPermissionTree() {
+        try {
+            // 1. 获取所有菜单
+            List<Menu> allMenus = menuService.listAll();
+
+            // 2. 获取所有权限
+            List<Permission> allPermissions = permissionMapper.selectAll();
+
+            // 3. 按菜单编码分组权限
+            Map<String, List<Permission>> permissionsByMenuCode = allPermissions.stream()
+                    .filter(p -> p.getMenuCode() != null)
+                    .collect(Collectors.groupingBy(Permission::getMenuCode));
+
+            // 4. 转换菜单为响应对象
+            Map<Long, MenuPermissionTreeResponse> menuMap = new HashMap<>();
+            for (Menu menu : allMenus) {
+                MenuPermissionTreeResponse response = convertToMenuPermissionResponse(menu);
+
+                // 添加该菜单下的权限
+                List<Permission> menuPermissions = permissionsByMenuCode.get(menu.getMenuCode());
+                if (menuPermissions != null) {
+                    for (Permission permission : menuPermissions) {
+                        MenuPermissionTreeResponse.PermissionInfo permInfo = new MenuPermissionTreeResponse.PermissionInfo();
+                        BeanUtils.copyProperties(permission, permInfo);
+                        response.getPermissions().add(permInfo);
+                    }
+                }
+
+                menuMap.put(menu.getId(), response);
+            }
+
+            // 5. 构建树结构
+            List<MenuPermissionTreeResponse> roots = new ArrayList<>();
+            for (MenuPermissionTreeResponse menu : menuMap.values()) {
+                if (menu.getParentId() == null || !menuMap.containsKey(menu.getParentId())) {
+                    roots.add(menu);
+                } else {
+                    menuMap.get(menu.getParentId()).getChildren().add(menu);
+                }
+            }
+
+            // 6. 按排序字段排序
+            sortMenuTree(roots);
+
+            return roots;
+
+        } catch (Exception e) {
+            log.error("获取菜单权限树失败", e);
+            return Collections.emptyList();
+        }
+    }
+
+    /**
+     * 转换Menu为MenuPermissionTreeResponse
+     */
+    private MenuPermissionTreeResponse convertToMenuPermissionResponse(Menu menu) {
+        MenuPermissionTreeResponse response = new MenuPermissionTreeResponse();
+        BeanUtils.copyProperties(menu, response);
+        return response;
+    }
+
+    /**
+     * 递归排序菜单树
+     */
+    private void sortMenuTree(List<MenuPermissionTreeResponse> menus) {
+        if (menus == null || menus.isEmpty()) {
+            return;
+        }
+
+        // 按sortOrder排序，如果sortOrder相同则按id排序
+        menus.sort((m1, m2) -> {
+            int sortCompare = Integer.compare(
+                m1.getSortOrder() != null ? m1.getSortOrder() : 0,
+                m2.getSortOrder() != null ? m2.getSortOrder() : 0
+            );
+            if (sortCompare != 0) {
+                return sortCompare;
+            }
+            return Long.compare(m1.getId(), m2.getId());
+        });
+
+        // 递归排序子菜单
+        for (MenuPermissionTreeResponse menu : menus) {
+            sortMenuTree(menu.getChildren());
+        }
     }
 }

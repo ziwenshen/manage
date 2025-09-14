@@ -2,6 +2,9 @@ package com.server.manage.controller.perm;
 
 import com.server.manage.annotation.HasPermission;
 import com.server.manage.common.ApiResponse;
+import com.server.manage.dto.common.PageResult;
+import com.server.manage.dto.role.RoleQueryRequest;
+import com.server.manage.dto.role.RoleResponse;
 import com.server.manage.model.Role;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -19,10 +22,20 @@ public class RoleController {
     @Autowired
     private com.server.manage.service.IRoleService roleService;
 
+    /**
+     * 分页查询角色列表
+     */
     @HasPermission(value = "menu:role:view", description = "查看角色列表")
     @GetMapping("/list")
-    public ApiResponse<List<Role>> listRoles() {
-        return ApiResponse.ok(null);
+    public ApiResponse<PageResult<RoleResponse>> getRoleList(RoleQueryRequest request) {
+        List<RoleResponse> roles = roleService.getRoleList(request);
+        Long total = roleService.getRoleCount(request);
+
+        Integer page = request.getPage() != null ? request.getPage() : 1;
+        Integer size = request.getSize() != null ? request.getSize() : 10;
+
+        PageResult<RoleResponse> result = PageResult.of(roles, total, page, size);
+        return ApiResponse.ok(result);
     }
 
     @HasPermission(value = "menu:role:add", description = "创建角色")
@@ -46,14 +59,14 @@ public class RoleController {
         return ApiResponse.ok("角色删除成功");
     }
 
-    @HasPermission(value = "menu:role:view", description = "查看角色权限")
+    @HasPermission(value = "menu:role:viewpermission", description = "查看角色权限")
     @GetMapping("/{roleId}/permissions")
     public ApiResponse<Set<String>> getRolePermissions(@PathVariable Long roleId) {
     Set<String> permissions = roleService.getRolePermissions(roleId);
         return ApiResponse.ok(permissions);
     }
 
-    @HasPermission(value = "menu:role:edit", description = "分配角色权限")
+    @HasPermission(value = "menu:role:assignpermission", description = "分配角色权限")
     @PostMapping("/{roleId}/permissions")
     public ApiResponse<String> assignRolePermissions(@PathVariable Long roleId, @RequestBody List<Long> permissionIds) {
     roleService.assignPermissions(roleId, permissionIds);

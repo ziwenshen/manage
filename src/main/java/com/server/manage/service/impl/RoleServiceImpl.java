@@ -1,9 +1,12 @@
 package com.server.manage.service.impl;
 
+import com.server.manage.dto.role.RoleQueryRequest;
+import com.server.manage.dto.role.RoleResponse;
 import com.server.manage.mapper.RoleMapper;
 import com.server.manage.model.Role;
 import com.server.manage.service.IRoleService;
 import com.server.manage.service.PermissionRedisService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class RoleServiceImpl implements IRoleService {
@@ -110,5 +114,42 @@ public class RoleServiceImpl implements IRoleService {
                 }
             }
         }
+    }
+
+    @Override
+    public List<RoleResponse> getRoleList(RoleQueryRequest request) {
+        if (request == null) {
+            request = new RoleQueryRequest();
+        }
+
+        // 计算分页参数
+        int page = request.getPage() != null && request.getPage() > 0 ? request.getPage() : 1;
+        int size = request.getSize() != null && request.getSize() > 0 ? request.getSize() : 10;
+        int offset = (page - 1) * size;
+
+        // 查询角色列表
+        List<Role> roles = roleMapper.selectPageList(request, offset, size);
+
+        // 转换为响应对象列表
+        return roles.stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Long getRoleCount(RoleQueryRequest request) {
+        if (request == null) {
+            request = new RoleQueryRequest();
+        }
+        return roleMapper.selectCount(request);
+    }
+
+    /**
+     * 转换Role实体为RoleResponse
+     */
+    private RoleResponse convertToResponse(Role role) {
+        RoleResponse response = new RoleResponse();
+        BeanUtils.copyProperties(role, response);
+        return response;
     }
 }

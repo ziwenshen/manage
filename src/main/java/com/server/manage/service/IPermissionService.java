@@ -55,4 +55,10 @@ public interface IPermissionService {
      * @param userId 用户ID
      */
     void refreshUserPermissions(Long userId);
+
+    /**
+     * 获取菜单权限树，用于角色分配权限选择
+     * @return 菜单权限树列表
+     */
+    List<com.server.manage.dto.menu.MenuPermissionTreeResponse> getMenuPermissionTree();
 }

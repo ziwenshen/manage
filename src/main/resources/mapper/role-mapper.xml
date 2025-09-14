@@ -10,15 +10,21 @@
         <result column="created_at" property="createdAt" typeHandler="com.server.manage.config.PostgreSqlLocalDateTimeTypeHandler"/>
     </resultMap>
 
+    <!-- 基础字段 -->
+    <sql id="Base_Column_List">
+        id, name, code, description, created_at::timestamp as created_at
+    </sql>
+
     <select id="selectById" resultMap="BaseResultMap" parameterType="long">
-        SELECT id, name, code, description, created_at::timestamp as created_at
+        SELECT <include refid="Base_Column_List"/>
         FROM role
         WHERE id = #{id}
     </select>
 
     <select id="selectAll" resultMap="BaseResultMap">
-        SELECT id, name, code, description, created_at::timestamp as created_at
+        SELECT <include refid="Base_Column_List"/>
         FROM role
+        ORDER BY created_at DESC
     </select>
 
     <insert id="insert" parameterType="com.server.manage.model.Role" useGeneratedKeys="true" keyProperty="id">
@@ -35,5 +41,35 @@
     <delete id="deleteById" parameterType="long">
         DELETE FROM role WHERE id = #{id}
     </delete>
+
+    <!-- 分页查询角色列表 -->
+    <select id="selectPageList" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM role
+        <where>
+            <if test="query.name != null and query.name != ''">
+                AND name LIKE CONCAT('%', #{query.name}, '%')
+            </if>
+            <if test="query.code != null and query.code != ''">
+                AND code LIKE CONCAT('%', #{query.code}, '%')
+            </if>
+        </where>
+        ORDER BY created_at DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- 查询角色总数 -->
+    <select id="selectCount" resultType="long">
+        SELECT COUNT(*)
+        FROM role
+        <where>
+            <if test="query.name != null and query.name != ''">
+                AND name LIKE CONCAT('%', #{query.name}, '%')
+            </if>
+            <if test="query.code != null and query.code != ''">
+                AND code LIKE CONCAT('%', #{query.code}, '%')
+            </if>
+        </where>
+    </select>
 
 </mapper>
