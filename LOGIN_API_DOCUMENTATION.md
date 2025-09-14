@@ -58,6 +58,106 @@
         }
     }
 }
+{
+	"success": true,
+	"code": 200,
+	"message": "success",
+	"data": {
+		"accessToken": "eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTc1Nzc0OTE3MCwiZXhwIjoxNzU3ODM1NTcwfQ.GdpmD5I0SlXlV_UXbrUS8BFLmNKJGf9CHlbIj1kgFWOPL1S0keHgTPeHvBLDjiY5",
+		"tokenType": "Bearer",
+		"expiresIn": 86400,
+		"userInfo": {
+			"userId": 5,
+			"username": "admin",
+			"enabled": true,
+			"createdAt": "2025-09-11 15:27:33"
+		},
+		"permissionInfo": {
+			"roleIds": [
+				1
+			],
+			"roleNames": [
+				"系统管理员"
+			],
+			"permissions": [
+				"menu:system:view",
+				"menu:user:view",
+				"menu:user:edit",
+				"menu:user:add",
+				"menu:user:delete"
+			],
+			"menus": [
+				{
+					"id": 1,
+					"menuCode": "system",
+					"name": "系统管理",
+					"module": "menu",
+					"nodeType": 2,
+					"sortOrder": 1,
+					"createdAt": "2025-09-11 17:04:08",
+					"parentId": null,
+					"children": [
+						{
+							"id": 2,
+							"menuCode": "user",
+							"name": "用户管理",
+							"module": "menu",
+							"nodeType": 2,
+							"sortOrder": 1,
+							"createdAt": "2025-09-11 17:18:57",
+							"parentId": 1,
+							"children": []
+						}
+					]
+				}
+			]
+		},
+		"loginStatusInfo": {
+			"loginTime": "2025-09-13 15:39:49",
+			"loginIp": "127.0.0.1",
+			"clientInfo": "Web Client",
+			"sessionId": "eyJhbGciOi..."
+		}
+	}
+}```
+
+## 登出接口
+
+### 请求
+- **URL**: `POST /auth/logout`
+- **Authorization**: `Bearer <accessToken>`
+
+### 成功响应
+
+```json
+{
+    "success": true,
+    "code": 200,
+    "message": "操作成功",
+    "data": "登出成功"
+}
+```
+
+### 错误响应
+
+缺少认证令牌：
+```json
+{
+    "success": false,
+    "code": 400,
+    "message": "缺少认证令牌",
+    "data": null
+}
+```
+
+服务器内部错误：
+```json
+{
+    "success": false,
+    "code": 500,
+    "message": "登出失败",
+    "data": null
+}
 ```
 
 ## 响应字段说明
@@ -110,11 +210,11 @@ console.log(`欢迎 ${userInfo.displayName || userInfo.username}`);
 const { permissionInfo } = response.data;
 
 // 角色判断
-const isAdmin = permissionInfo.roleNames.includes('管理员');
+const isAdmin = permissionInfo.roleNames.includes('系统管理员');
 
 // 按钮权限判断
-const canAddUser = permissionInfo.permissions.includes('user:user-list:add');
-const canDeleteUser = permissionInfo.permissions.includes('user:user-list:delete');
+const canAddUser = permissionInfo.permissions.includes('menu:user:add');
+const canDeleteUser = permissionInfo.permissions.includes('menu:user:delete');
 
 // 动态显示/隐藏按钮
 if (canAddUser) {
@@ -122,7 +222,14 @@ if (canAddUser) {
 }
 ```
 
-### 4. 登录状态显示
+### 4. 菜单显示
+```javascript
+const { menus } = response.data.permissionInfo;
+// 根据菜单数据渲染导航栏
+renderMenu(menus);
+```
+
+### 5. 登录状态显示
 ```javascript
 const { loginStatusInfo } = response.data;
 console.log(`登录时间: ${loginStatusInfo.loginTime}`);
@@ -163,8 +270,8 @@ console.log(`登录IP: ${loginStatusInfo.loginIp}`);
 权限采用三段式格式：`{module}:{menuCode}:{action}`
 
 示例：
-- `user:user-list:view` - 用户模块-用户列表-查看权限
-- `user:user-list:add` - 用户模块-用户列表-新增权限
-- `order:order-list:export` - 订单模块-订单列表-导出权限
+- `menu:system:view` - 菜单模块-系统管理-查看权限
+- `menu:user:add` - 菜单模块-用户管理-新增权限
+- `menu:user:delete` - 菜单模块-用户管理-删除权限
 
 这样的设计让前端可以精确控制到按钮级别的权限显示。

@@ -4,14 +4,14 @@ import com.server.manage.mapper.PermissionMapper;
 import com.server.manage.model.Permission;
 import com.server.manage.service.IPermissionService;
 import com.server.manage.service.PermissionRedisService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
+@Slf4j
 @Service
 public class PermissionServiceImpl implements IPermissionService {
 
@@ -107,41 +107,50 @@ public class PermissionServiceImpl implements IPermissionService {
 
     @Override
     public Set<String> loadUserPermissions(Long userId) {
-        // 优先从缓存读取
-        Set<String> cached = permissionRedisService.getUserPermissions(userId);
-        if (cached != null && !cached.isEmpty()) {
-            return cached;
+        if (userId == null) {
+            return Collections.emptySet();
         }
-        // 从数据库聚合用户权限：先查询用户直赋权限，再查询用户角色关联的权限
+
+        log.debug("加载用户权限: userId={}", userId);
         Set<String> permissions = new HashSet<>();
 
-        // 1) 用户直赋权限
-        Set<Long> userPermissionIds = userPermissionMapper.selectPermissionIdsByUserId(userId);
-        if (userPermissionIds != null && !userPermissionIds.isEmpty()) {
-            for (Long pid : userPermissionIds) {
-                Permission p = permissionMapper.selectById(pid);
-                if (p != null && p.getCode() != null) {
-                    permissions.add(p.getCode());
-                }
-            }
-        }
+        try {
+            // 1) 获取用户直赋权限ID
+            Set<Long> userPermissionIds = userPermissionMapper.selectPermissionIdsByUserId(userId);
 
-        // 2) 通过用户角色获取权限
-        Set<Long> roleIds = userRoleMapper.selectRoleIdsByUserId(userId);
-        if (roleIds != null && !roleIds.isEmpty()) {
-            Set<Long> permIds = rolePermissionMapper.selectPermissionIdsByRoleIds(roleIds);
-            if (permIds != null && !permIds.isEmpty()) {
-                for (Long pid : permIds) {
-                    Permission p = permissionMapper.selectById(pid);
-                    if (p != null && p.getCode() != null) {
-                        permissions.add(p.getCode());
+            // 2) 获取用户角色关联的权限ID
+            Set<Long> roleIds = userRoleMapper.selectRoleIdsByUserId(userId);
+            Set<Long> rolePermissionIds = Collections.emptySet();
+            if (roleIds != null && !roleIds.isEmpty()) {
+                rolePermissionIds = rolePermissionMapper.selectPermissionIdsByRoleIds(roleIds);
+            }
+
+            // 3) 合并所有权限ID
+            Set<Long> allPermissionIds = new HashSet<>();
+            if (userPermissionIds != null) {
+                allPermissionIds.addAll(userPermissionIds);
+            }
+            if (rolePermissionIds != null) {
+                allPermissionIds.addAll(rolePermissionIds);
+            }
+
+            // 4) 批量查询权限信息，避免N+1查询问题
+            if (!allPermissionIds.isEmpty()) {
+                List<Permission> permissionList = permissionMapper.selectByIds(allPermissionIds);
+                for (Permission permission : permissionList) {
+                    if (permission != null && permission.getCode() != null && !permission.getCode().trim().isEmpty()) {
+                        permissions.add(permission.getCode());
                     }
                 }
             }
+
+            log.debug("用户 {} 拥有权限: {}", userId, permissions);
+            return permissions;
+
+        } catch (Exception e) {
+            log.error("加载用户权限失败: userId={}, error={}", userId, e.getMessage(), e);
+            return Collections.emptySet();
         }
-        // 缓存结果
-        permissionRedisService.cacheUserPermissions(userId, permissions);
-        return permissions;
     }
 
     @Override

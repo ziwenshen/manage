@@ -12,7 +12,7 @@ import java.util.List;
  * 权限（permission）相关的 CRUD 接口
  */
 @RestController
-@RequestMapping("/api/permissions/perm")
+@RequestMapping("/permissions/perm")
 public class PermissionCrudController {
 
     @Autowired
