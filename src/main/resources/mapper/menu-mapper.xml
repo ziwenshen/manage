@@ -69,4 +69,52 @@
         DELETE FROM menu WHERE parent_id = #{parentId}
     </delete>
 
+    <!-- 分页查询菜单列表 -->
+    <select id="selectPageList" resultMap="BaseResultMap">
+        SELECT id, parent_id, menu_code, name, module, node_type, sort_order, created_at::timestamp as created_at
+        FROM menu
+        <where>
+            <if test="query.name != null and query.name != ''">
+                AND name LIKE CONCAT('%', #{query.name}, '%')
+            </if>
+            <if test="query.menuCode != null and query.menuCode != ''">
+                AND menu_code LIKE CONCAT('%', #{query.menuCode}, '%')
+            </if>
+            <if test="query.module != null and query.module != ''">
+                AND module = #{query.module}
+            </if>
+            <if test="query.nodeType != null">
+                AND node_type = #{query.nodeType}
+            </if>
+            <if test="query.parentId != null">
+                AND parent_id = #{query.parentId}
+            </if>
+        </where>
+        ORDER BY sort_order, id
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- 查询菜单总数 -->
+    <select id="selectCount" resultType="long">
+        SELECT COUNT(*)
+        FROM menu
+        <where>
+            <if test="query.name != null and query.name != ''">
+                AND name LIKE CONCAT('%', #{query.name}, '%')
+            </if>
+            <if test="query.menuCode != null and query.menuCode != ''">
+                AND menu_code LIKE CONCAT('%', #{query.menuCode}, '%')
+            </if>
+            <if test="query.module != null and query.module != ''">
+                AND module = #{query.module}
+            </if>
+            <if test="query.nodeType != null">
+                AND node_type = #{query.nodeType}
+            </if>
+            <if test="query.parentId != null">
+                AND parent_id = #{query.parentId}
+            </if>
+        </where>
+    </select>
+
 </mapper>

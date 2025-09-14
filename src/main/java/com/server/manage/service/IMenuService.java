@@ -1,5 +1,7 @@
 package com.server.manage.service;
 
+import com.server.manage.dto.menu.MenuQueryRequest;
+import com.server.manage.dto.menu.MenuResponse;
 import com.server.manage.model.Menu;
 
 import java.util.List;
@@ -33,7 +35,7 @@ public interface IMenuService {
     /**
      * 获取菜单树结构
      */
-    List<Menu> getMenuTree();
+    List<MenuResponse> getMenuTree();
     
     /**
      * 创建菜单
@@ -54,4 +56,14 @@ public interface IMenuService {
      * 批量删除菜单
      */
     void deleteBatch(List<Long> ids);
+
+    /**
+     * 分页查询菜单列表
+     */
+    List<MenuResponse> getMenuList(MenuQueryRequest request);
+
+    /**
+     * 查询菜单总数
+     */
+    Long getMenuCount(MenuQueryRequest request);
 }

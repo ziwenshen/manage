@@ -33,4 +33,23 @@ public class MenuResponse {
 	public void setParentId(Long parentId) { this.parentId = parentId; }
 	public List<MenuResponse> getChildren() { return children; }
 	public void setChildren(List<MenuResponse> children) { this.children = children; }
+
+	/**
+	 * 获取节点类型描述
+	 */
+	public String getNodeTypeText() {
+		if (nodeType == null) {
+			return "未知";
+		}
+		switch (nodeType) {
+			case 1:
+				return "文件夹";
+			case 2:
+				return "页面";
+			case 3:
+				return "按钮";
+			default:
+				return "未知";
+		}
+	}
 }

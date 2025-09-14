@@ -1,5 +1,6 @@
 package com.server.manage.mapper;
 
+import com.server.manage.dto.menu.MenuQueryRequest;
 import com.server.manage.model.Menu;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -52,4 +53,16 @@ public interface MenuMapper {
      * 根据父级ID删除子菜单
      */
     int deleteByParentId(@Param("parentId") Long parentId);
+
+    /**
+     * 分页查询菜单列表
+     */
+    List<Menu> selectPageList(@Param("query") MenuQueryRequest query,
+                             @Param("offset") Integer offset,
+                             @Param("limit") Integer limit);
+
+    /**
+     * 查询菜单总数
+     */
+    Long selectCount(@Param("query") MenuQueryRequest query);
 }
