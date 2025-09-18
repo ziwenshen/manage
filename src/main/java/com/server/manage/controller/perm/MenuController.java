@@ -7,7 +7,6 @@ import com.server.manage.dto.menu.MenuCreateRequest;
 import com.server.manage.dto.menu.MenuQueryRequest;
 import com.server.manage.dto.menu.MenuResponse;
 import com.server.manage.dto.menu.MenuUpdateRequest;
-import com.server.manage.model.Menu;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

@@ -1,0 +1,137 @@
+spring:
+  application:
+    name: manage
+  main:
+    allow-bean-definition-overriding: true
+
+  # 生产环境数据源配置
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://192.168.156.136:5432/manage_db?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=utf8
+    username: postgres
+    password: postgres
+    hikari:
+      minimum-idle: 10
+      maximum-pool-size: 50
+      auto-commit: true
+      idle-timeout: 30000
+      pool-name: ManageHikariCP
+      max-lifetime: 1800000
+      connection-timeout: 30000
+      connection-test-query: SELECT 1
+
+  # Jackson配置
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+    default-property-inclusion: NON_NULL
+    serialization:
+      write-dates-as-timestamps: false
+      fail-on-empty-beans: false
+    deserialization:
+      fail-on-unknown-properties: false
+
+  # Thymeleaf配置
+  thymeleaf:
+    check-template-location: false
+
+  # 生产环境Redis配置
+  data:
+    redis:
+      host: 192.168.156.136
+      port: 6379
+      password: 
+      database: 0
+      timeout: 5000ms
+      lettuce:
+        pool:
+          max-active: 50
+          max-wait: -1ms
+          max-idle: 20
+          min-idle: 5
+
+# MyBatis-Plus配置
+mybatis-plus:
+  configuration:
+    # 开启驼峰命名转换
+    map-underscore-to-camel-case: true
+    # 开启缓存
+    cache-enabled: true
+    # 生产环境关闭SQL日志
+    # log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+  # 全局配置
+  global-config:
+    db-config:
+      # 主键类型
+      id-type: auto
+      # 逻辑删除字段
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+      # 字段验证策略
+      insert-strategy: NOT_NULL
+      update-strategy: NOT_NULL
+
+  # Mapper XML文件位置
+  mapper-locations: classpath*:/mapper/**/*.xml
+  # 实体类包路径
+  type-aliases-package: com.server.manage.model
+  
+  # TypeHandler配置
+  type-handlers-package: com.server.manage.config
+
+# 服务器配置
+server:
+  port: 8080
+  address: 0.0.0.0  # 监听所有网络接口，允许远程访问
+  servlet:
+    context-path: /api
+
+# 生产环境日志配置
+logging:
+  level:
+    "[com.mes.manage]": info
+    "[com.baomidou.mybatisplus]": warn
+    "[org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer]": error
+    root: info
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{50} - %msg%n"
+  file:
+    name: logs/manage.log
+    max-size: 100MB
+    max-history: 30
+
+# 数据库时区配置
+database:
+  timezone: GMT+8
+
+# JWT配置
+jwt:
+  # JWT密钥 (生产环境建议使用环境变量)
+  secret: ${JWT_SECRET:mySecretKey123456789012345678901234567890123456789012345678901234567890}
+  # token过期时间，单位秒 (24小时)
+  expiration: 86400
+
+# 跨域配置
+cors:
+  allowed-origins:
+    - "http://localhost:3000"
+    - "http://localhost:8080"
+    - "http://192.168.156.136:8080"
+    - "http://192.168.156.136:3000"
+    - "http://115.190.139.17:8080"
+    - "https://115.190.139.17:8080"
+    # 添加您的域名（替换 yourdomain.com）
+    - "http://yourdomain.com"
+    - "https://yourdomain.com"
+    - "http://api.yourdomain.com"
+    - "https://api.yourdomain.com"
+  allowed-methods:
+    - GET
+    - POST
+    - PUT
+    - DELETE
+    - OPTIONS
+  allowed-headers: "*"
+  allow-credentials: true
