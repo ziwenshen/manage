@@ -45,9 +45,5 @@ public class Permission extends BaseEntity {
     @TableField("action")
     private String action;
 
-    /**
-     * URL路径
-     */
-    @TableField("url")
-    private String url;
+
 }

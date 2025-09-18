@@ -1,7 +1,9 @@
 package com.server.manage.service;
 
+import com.server.manage.dto.menu.MenuCreateRequest;
 import com.server.manage.dto.menu.MenuQueryRequest;
 import com.server.manage.dto.menu.MenuResponse;
+import com.server.manage.dto.menu.MenuUpdateRequest;
 import com.server.manage.model.Menu;
 
 import java.util.List;
@@ -66,4 +68,14 @@ public interface IMenuService {
      * 查询菜单总数
      */
     Long getMenuCount(MenuQueryRequest request);
+
+    /**
+     * 创建菜单（使用DTO）
+     */
+    Long createMenu(MenuCreateRequest request);
+
+    /**
+     * 更新菜单（使用DTO）
+     */
+    void updateMenu(MenuUpdateRequest request);
 }

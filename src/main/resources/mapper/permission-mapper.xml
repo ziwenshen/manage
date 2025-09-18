@@ -10,23 +10,22 @@
         <result column="module" property="module" />
         <result column="menu_code" property="menuCode" />
         <result column="action" property="action" />
-        <result column="url" property="url" />
         <result column="created_at" property="createdAt" typeHandler="com.server.manage.config.PostgreSqlLocalDateTimeTypeHandler"/>
     </resultMap>
 
     <select id="selectById" resultMap="BaseResultMap" parameterType="long">
-        SELECT id, code, name, module, menu_code, action, url, created_at::timestamp as created_at
+        SELECT id, code, name, module, menu_code, action, created_at::timestamp as created_at
         FROM permission
         WHERE id = #{id}
     </select>
 
     <select id="selectAll" resultMap="BaseResultMap">
-        SELECT id, code, name, module, menu_code, action, url, created_at::timestamp as created_at
+        SELECT id, code, name, module, menu_code, action, created_at::timestamp as created_at
         FROM permission
     </select>
 
     <select id="selectByIds" resultMap="BaseResultMap" parameterType="java.util.Set">
-        SELECT id, code, name, module, menu_code, action, url, created_at::timestamp as created_at
+        SELECT id, code, name, module, menu_code, action, created_at::timestamp as created_at
         FROM permission
         WHERE id IN
         <foreach item="id" collection="ids" open="(" separator="," close=")">
@@ -35,13 +34,13 @@
     </select>
 
     <insert id="insert" parameterType="com.server.manage.model.Permission" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO permission (code, name, module, menu_code, action, url, created_at)
-        VALUES (#{code}, #{name}, #{module}, #{menuCode}, #{action}, #{url}, now())
+        INSERT INTO permission (code, name, module, menu_code, action, created_at)
+        VALUES (#{code}, #{name}, #{module}, #{menuCode}, #{action}, now())
     </insert>
 
     <update id="update" parameterType="com.server.manage.model.Permission">
         UPDATE permission
-        SET code = #{code}, name = #{name}, module = #{module}, menu_code = #{menuCode}, action = #{action}, url = #{url}
+        SET code = #{code}, name = #{name}, module = #{module}, menu_code = #{menuCode}, action = #{action}
         WHERE id = #{id}
     </update>
 
@@ -61,4 +60,60 @@
                     AND m.node_type IN (1, 2)
                 ORDER BY m.sort_order, m.id
         </select>
+
+    <!-- 分页查询权限列表 -->
+    <select id="selectPageList" resultMap="BaseResultMap">
+        SELECT id, code, name, module, menu_code, action, created_at::timestamp as created_at
+        FROM permission
+        <where>
+            <if test="query.name != null and query.name != ''">
+                AND name LIKE CONCAT('%', #{query.name}, '%')
+            </if>
+            <if test="query.code != null and query.code != ''">
+                AND code LIKE CONCAT('%', #{query.code}, '%')
+            </if>
+            <if test="query.module != null and query.module != ''">
+                AND module = #{query.module}
+            </if>
+            <if test="query.menuCode != null and query.menuCode != ''">
+                AND menu_code = #{query.menuCode}
+            </if>
+            <if test="query.action != null and query.action != ''">
+                AND action = #{query.action}
+            </if>
+        </where>
+        ORDER BY module, menu_code, action, id
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- 查询权限总数 -->
+    <select id="selectCount" resultType="long">
+        SELECT COUNT(*)
+        FROM permission
+        <where>
+            <if test="query.name != null and query.name != ''">
+                AND name LIKE CONCAT('%', #{query.name}, '%')
+            </if>
+            <if test="query.code != null and query.code != ''">
+                AND code LIKE CONCAT('%', #{query.code}, '%')
+            </if>
+            <if test="query.module != null and query.module != ''">
+                AND module = #{query.module}
+            </if>
+            <if test="query.menuCode != null and query.menuCode != ''">
+                AND menu_code = #{query.menuCode}
+            </if>
+            <if test="query.action != null and query.action != ''">
+                AND action = #{query.action}
+            </if>
+        </where>
+    </select>
+
+    <!-- 根据权限编码查询权限 -->
+    <select id="selectByCode" resultMap="BaseResultMap">
+        SELECT id, code, name, module, menu_code, action, url, created_at::timestamp as created_at
+        FROM permission
+        WHERE code = #{code}
+    </select>
+
 </mapper>

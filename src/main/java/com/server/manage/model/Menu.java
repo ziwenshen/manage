@@ -50,4 +50,10 @@ public class Menu extends BaseEntity {
      */
     @TableField("sort_order")
     private Integer sortOrder = 0;
+
+    /**
+     * URL路径
+     */
+    @TableField("url")
+    private String url;
 }

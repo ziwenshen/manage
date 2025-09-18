@@ -3,8 +3,10 @@ package com.server.manage.controller.perm;
 import com.server.manage.annotation.HasPermission;
 import com.server.manage.common.ApiResponse;
 import com.server.manage.dto.common.PageResult;
+import com.server.manage.dto.menu.MenuCreateRequest;
 import com.server.manage.dto.menu.MenuQueryRequest;
 import com.server.manage.dto.menu.MenuResponse;
+import com.server.manage.dto.menu.MenuUpdateRequest;
 import com.server.manage.model.Menu;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -49,15 +51,15 @@ public class MenuController {
 
     @HasPermission(value = "menu:menu:add", description = "创建菜单")
     @PostMapping("/create")
-    public ApiResponse<String> createMenu(@RequestBody Menu menu) {
-    menuService.create(menu);
+    public ApiResponse<String> createMenu(@RequestBody MenuCreateRequest request) {
+        menuService.createMenu(request);
         return ApiResponse.ok("菜单创建成功");
     }
 
     @HasPermission(value = "menu:menu:edit", description = "编辑菜单")
     @PutMapping("/update")
-    public ApiResponse<String> updateMenu(@RequestBody Menu menu) {
-    menuService.update(menu);
+    public ApiResponse<String> updateMenu(@RequestBody MenuUpdateRequest request) {
+        menuService.updateMenu(request);
         return ApiResponse.ok("菜单更新成功");
     }
 

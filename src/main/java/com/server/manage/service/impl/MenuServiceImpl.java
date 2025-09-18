@@ -1,7 +1,9 @@
 package com.server.manage.service.impl;
 
+import com.server.manage.dto.menu.MenuCreateRequest;
 import com.server.manage.dto.menu.MenuQueryRequest;
 import com.server.manage.dto.menu.MenuResponse;
+import com.server.manage.dto.menu.MenuUpdateRequest;
 import com.server.manage.mapper.MenuMapper;
 import com.server.manage.model.Menu;
 import com.server.manage.service.IMenuService;
@@ -144,21 +146,6 @@ public class MenuServiceImpl implements IMenuService {
         return result;
     }
 
-    /**
-     * 构建菜单树（保留原方法用于其他地方）
-     */
-    private List<Menu> buildMenuTree(List<Menu> allMenus, Long parentId) {
-        List<Menu> result = new ArrayList<>();
-
-        for (Menu menu : allMenus) {
-            if (Objects.equals(menu.getParentId(), parentId)) {
-                result.add(menu);
-            }
-        }
-
-        return result;
-    }
-
     @Override
     public List<MenuResponse> getMenuList(MenuQueryRequest request) {
         if (request == null) {
@@ -198,5 +185,59 @@ public class MenuServiceImpl implements IMenuService {
         MenuResponse response = new MenuResponse();
         BeanUtils.copyProperties(menu, response);
         return response;
+    }
+
+    @Override
+    @Transactional
+    public Long createMenu(MenuCreateRequest request) {
+        if (request == null) {
+            throw new IllegalArgumentException("菜单创建请求不能为空");
+        }
+
+        // 检查菜单编码是否已存在
+        if (request.getMenuCode() != null && getByMenuCode(request.getMenuCode()) != null) {
+            throw new IllegalArgumentException("菜单编码已存在: " + request.getMenuCode());
+        }
+
+        Menu menu = new Menu();
+        BeanUtils.copyProperties(request, menu);
+        menu.setCreatedAt(java.time.LocalDateTime.now());
+
+        Long menuId = create(menu);
+
+        // 清除相关缓存
+        permissionRedisService.clearAllPermissionCache();
+
+        return menuId;
+    }
+
+    @Override
+    @Transactional
+    public void updateMenu(MenuUpdateRequest request) {
+        if (request == null || request.getId() == null) {
+            throw new IllegalArgumentException("菜单更新请求或ID不能为空");
+        }
+
+        // 检查菜单是否存在
+        Menu existingMenu = getById(request.getId());
+        if (existingMenu == null) {
+            throw new IllegalArgumentException("菜单不存在: " + request.getId());
+        }
+
+        // 检查菜单编码是否与其他菜单冲突
+        if (request.getMenuCode() != null && !request.getMenuCode().equals(existingMenu.getMenuCode())) {
+            Menu conflictMenu = getByMenuCode(request.getMenuCode());
+            if (conflictMenu != null && !conflictMenu.getId().equals(request.getId())) {
+                throw new IllegalArgumentException("菜单编码已存在: " + request.getMenuCode());
+            }
+        }
+
+        Menu menu = new Menu();
+        BeanUtils.copyProperties(request, menu);
+
+        update(menu);
+
+        // 清除相关缓存
+        permissionRedisService.clearAllPermissionCache();
     }
 }

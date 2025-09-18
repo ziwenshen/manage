@@ -1,6 +1,9 @@
 package com.server.manage.service.impl;
 
 import com.server.manage.dto.menu.MenuPermissionTreeResponse;
+import com.server.manage.dto.permission.PermissionQueryRequest;
+import com.server.manage.dto.permission.PermissionResponse;
+import com.server.manage.dto.permission.PermissionTreeResponse;
 import com.server.manage.mapper.PermissionMapper;
 import com.server.manage.model.Menu;
 import com.server.manage.model.Permission;
@@ -254,5 +257,96 @@ public class PermissionServiceImpl implements IPermissionService {
         for (MenuPermissionTreeResponse menu : menus) {
             sortMenuTree(menu.getChildren());
         }
+    }
+
+    @Override
+    public List<PermissionResponse> getPermissionList(PermissionQueryRequest request) {
+        if (request == null) {
+            request = new PermissionQueryRequest();
+        }
+
+        // 计算分页参数
+        Integer page = request.getPage() != null ? request.getPage() : 1;
+        Integer size = request.getSize() != null ? request.getSize() : 10;
+        Integer offset = (page - 1) * size;
+
+        // 查询权限列表
+        List<Permission> permissions = permissionMapper.selectPageList(request, offset, size);
+
+        // 转换为响应DTO
+        return permissions.stream()
+                .map(this::convertToPermissionResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Long getPermissionCount(PermissionQueryRequest request) {
+        if (request == null) {
+            request = new PermissionQueryRequest();
+        }
+        return permissionMapper.selectCount(request);
+    }
+
+    @Override
+    public List<PermissionTreeResponse> getPermissionTree() {
+        // 获取所有菜单和权限
+        List<Menu> allMenus = menuService.listAll();
+        List<Permission> allPermissions = permissionMapper.selectAll();
+
+        // 构建权限树
+        return buildPermissionTree(allMenus, allPermissions, null);
+    }
+
+    @Override
+    public Permission getByCode(String code) {
+        return permissionMapper.selectByCode(code);
+    }
+
+    /**
+     * 转换Permission实体为PermissionResponse
+     */
+    private PermissionResponse convertToPermissionResponse(Permission permission) {
+        if (permission == null) {
+            return null;
+        }
+
+        PermissionResponse response = new PermissionResponse();
+        BeanUtils.copyProperties(permission, response);
+        return response;
+    }
+
+    /**
+     * 构建权限树形结构
+     */
+    private List<PermissionTreeResponse> buildPermissionTree(List<Menu> allMenus, List<Permission> allPermissions, Long parentId) {
+        List<PermissionTreeResponse> result = new ArrayList<>();
+
+        // 添加当前层级的菜单节点
+        for (Menu menu : allMenus) {
+            if (Objects.equals(menu.getParentId(), parentId)) {
+                PermissionTreeResponse menuNode = PermissionTreeResponse.createMenuNode(
+                    menu.getId(), menu.getName(), menu.getMenuCode(),
+                    menu.getModule(), menu.getSortOrder(), menu.getCreatedAt()
+                );
+
+                // 递归添加子菜单
+                List<PermissionTreeResponse> children = buildPermissionTree(allMenus, allPermissions, menu.getId());
+
+                // 添加当前菜单的权限
+                List<PermissionTreeResponse> permissions = allPermissions.stream()
+                    .filter(p -> menu.getMenuCode().equals(p.getMenuCode()))
+                    .map(p -> PermissionTreeResponse.createPermissionNode(
+                        p.getId(), p.getName(), p.getCode(), p.getModule(),
+                        p.getMenuCode(), p.getAction(), p.getCreatedAt()
+                    ))
+                    .collect(Collectors.toList());
+
+                children.addAll(permissions);
+                menuNode.setChildren(children);
+                result.add(menuNode);
+            }
+        }
+
+        return result;
     }
 }

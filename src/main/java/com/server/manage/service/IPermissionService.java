@@ -1,5 +1,8 @@
 package com.server.manage.service;
 
+import com.server.manage.dto.permission.PermissionQueryRequest;
+import com.server.manage.dto.permission.PermissionResponse;
+import com.server.manage.dto.permission.PermissionTreeResponse;
 import com.server.manage.model.Permission;
 
 import java.util.List;
@@ -61,4 +64,31 @@ public interface IPermissionService {
      * @return 菜单权限树列表
      */
     List<com.server.manage.dto.menu.MenuPermissionTreeResponse> getMenuPermissionTree();
+
+    /**
+     * 分页查询权限列表
+     * @param request 查询请求
+     * @return 权限列表
+     */
+    List<PermissionResponse> getPermissionList(PermissionQueryRequest request);
+
+    /**
+     * 查询权限总数
+     * @param request 查询请求
+     * @return 权限总数
+     */
+    Long getPermissionCount(PermissionQueryRequest request);
+
+    /**
+     * 获取权限树形结构（按菜单层级组织）
+     * @return 权限树列表
+     */
+    List<PermissionTreeResponse> getPermissionTree();
+
+    /**
+     * 根据权限编码查询权限
+     * @param code 权限编码
+     * @return 权限实体
+     */
+    Permission getByCode(String code);
 }

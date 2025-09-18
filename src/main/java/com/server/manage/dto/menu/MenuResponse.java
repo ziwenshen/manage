@@ -13,6 +13,7 @@ public class MenuResponse {
 	private Integer sortOrder;
 	private LocalDateTime createdAt;
 	private Long parentId;
+	private String url;
 	private List<MenuResponse> children = new ArrayList<>();
 
 	public Long getId() { return id; }
@@ -31,6 +32,8 @@ public class MenuResponse {
 	public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 	public Long getParentId() { return parentId; }
 	public void setParentId(Long parentId) { this.parentId = parentId; }
+	public String getUrl() { return url; }
+	public void setUrl(String url) { this.url = url; }
 	public List<MenuResponse> getChildren() { return children; }
 	public void setChildren(List<MenuResponse> children) { this.children = children; }
 
