@@ -122,11 +122,17 @@ cors:
     - "http://192.168.156.136:3000"
     - "http://115.190.139.17:8080"
     - "https://115.190.139.17:8080"
-    # 添加您的域名（替换 yourdomain.com）
-    - "http://yourdomain.com"
-    - "https://yourdomain.com"
-    - "http://api.yourdomain.com"
-    - "https://api.yourdomain.com"
+    # 您的域名配置
+    - "http://ziwen.xin"
+    - "https://ziwen.xin"
+    - "http://api.ziwen.xin"
+    - "https://api.ziwen.xin"
+    - "http://www.ziwen.xin"
+    - "https://www.ziwen.xin"
+    - "http://ziwen.xin:8080"
+    - "https://ziwen.xin:8080"
+    - "http://www.ziwen.xin:8080"
+    - "https://www.ziwen.xin:8080"
   allowed-methods:
     - GET
     - POST
