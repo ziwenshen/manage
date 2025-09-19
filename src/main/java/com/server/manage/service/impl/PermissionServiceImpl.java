@@ -69,6 +69,10 @@ public class PermissionServiceImpl implements IPermissionService {
             menu.setModule((String)data.get("module"));
             menu.setNodeType(data.get("node_type") == null ? null : ((Number)data.get("node_type")).intValue());
             menu.setSortOrder(data.get("sort_order") == null ? null : ((Number)data.get("sort_order")).intValue());
+            menu.setUrl((String)data.get("url"));
+            menu.setIcon((String)data.get("icon"));
+            menu.setPath((String)data.get("path"));
+            menu.setMeta((String)data.get("meta"));
             Object createdAtObj = data.get("created_at");
             if (createdAtObj instanceof java.sql.Timestamp) {
                 menu.setCreatedAt(((java.sql.Timestamp) createdAtObj).toLocalDateTime());

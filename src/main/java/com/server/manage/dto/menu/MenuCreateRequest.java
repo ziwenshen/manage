@@ -2,44 +2,20 @@ package com.server.manage.dto.menu;
 
 import lombok.Data;
 
-/**
- * 菜单创建请求DTO
- */
+import java.io.Serializable;
+
 @Data
-public class MenuCreateRequest {
+public class MenuCreateRequest implements Serializable {
+    private static final long serialVersionUID = 1L;
 
-    /**
-     * 父级菜单ID
-     */
     private Long parentId;
-
-    /**
-     * 菜单编码
-     */
     private String menuCode;
-
-    /**
-     * 菜单名称
-     */
     private String name;
-
-    /**
-     * 业务模块标识
-     */
     private String module;
-
-    /**
-     * 节点类型：1=文件夹(folder), 2=页面(page), 3=按钮(button)
-     */
-    private Integer nodeType = 2;
-
-    /**
-     * 排序
-     */
-    private Integer sortOrder = 0;
-
-    /**
-     * URL路径
-     */
+    private Integer nodeType;
+    private Integer sortOrder;
     private String url;
+    private String icon;
+    private String path;
+    private String meta;
 }

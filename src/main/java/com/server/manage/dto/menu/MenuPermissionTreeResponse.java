@@ -49,6 +49,26 @@ public class MenuPermissionTreeResponse {
     private Integer sortOrder;
 
     /**
+     * URL路径
+     */
+    private String url;
+
+    /**
+     * 菜单图标
+     */
+    private String icon;
+
+    /**
+     * 前端组件路径
+     */
+    private String path;
+
+    /**
+     * 额外元数据 (JSON格式)
+     */
+    private String meta;
+
+    /**
      * 创建时间
      */
     private LocalDateTime createdAt;

@@ -11,44 +11,51 @@
         <result column="node_type" property="nodeType" />
         <result column="sort_order" property="sortOrder" />
         <result column="url" property="url" />
+        <result column="icon" property="icon" />
+        <result column="path" property="path" />
+        <result column="meta" property="meta" />
         <result column="created_at" property="createdAt" typeHandler="com.server.manage.config.PostgreSqlLocalDateTimeTypeHandler"/>
     </resultMap>
 
+    <sql id="Base_Column_List">
+        id, parent_id, menu_code, name, module, node_type, sort_order, url, icon, path, meta, created_at
+    </sql>
+
     <select id="selectAll" resultMap="BaseResultMap">
-        SELECT id, parent_id, menu_code, name, module, node_type, sort_order, url, created_at::timestamp as created_at
+        SELECT <include refid="Base_Column_List" />
         FROM menu
         ORDER BY sort_order, id
     </select>
 
     <select id="selectById" resultMap="BaseResultMap">
-        SELECT id, parent_id, menu_code, name, module, node_type, sort_order, url, created_at::timestamp as created_at
+        SELECT <include refid="Base_Column_List" />
         FROM menu
         WHERE id = #{id}
     </select>
 
     <select id="selectByParentId" resultMap="BaseResultMap">
-        SELECT id, parent_id, menu_code, name, module, node_type, sort_order, url, created_at::timestamp as created_at
+        SELECT <include refid="Base_Column_List" />
         FROM menu
         WHERE parent_id = #{parentId}
         ORDER BY sort_order, id
     </select>
 
     <select id="selectByMenuCode" resultMap="BaseResultMap">
-        SELECT id, parent_id, menu_code, name, module, node_type, sort_order, url, created_at::timestamp as created_at
+        SELECT <include refid="Base_Column_List" />
         FROM menu
         WHERE menu_code = #{menuCode}
     </select>
 
     <select id="selectByModule" resultMap="BaseResultMap">
-        SELECT id, parent_id, menu_code, name, module, node_type, sort_order, url, created_at::timestamp as created_at
+        SELECT <include refid="Base_Column_List" />
         FROM menu
         WHERE module = #{module}
         ORDER BY sort_order, id
     </select>
 
     <insert id="insert" parameterType="com.server.manage.model.Menu" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO menu (parent_id, menu_code, name, module, node_type, sort_order, url, created_at)
-        VALUES (#{parentId}, #{menuCode}, #{name}, #{module}, #{nodeType}, #{sortOrder}, #{url}, #{createdAt})
+        INSERT INTO menu (parent_id, menu_code, name, module, node_type, sort_order, url, icon, path, meta, created_at)
+        VALUES (#{parentId}, #{menuCode}, #{name}, #{module}, #{nodeType}, #{sortOrder}, #{url}, #{icon}, #{path}, #{meta}, #{createdAt})
     </insert>
 
     <update id="update" parameterType="com.server.manage.model.Menu">
@@ -59,7 +66,10 @@
             module = #{module},
             node_type = #{nodeType},
             sort_order = #{sortOrder},
-            url = #{url}
+            url = #{url},
+            icon = #{icon},
+            path = #{path},
+            meta = #{meta}
         WHERE id = #{id}
     </update>
 
@@ -73,7 +83,7 @@
 
     <!-- 分页查询菜单列表 -->
     <select id="selectPageList" resultMap="BaseResultMap">
-        SELECT id, parent_id, menu_code, name, module, node_type, sort_order, url, created_at::timestamp as created_at
+        SELECT <include refid="Base_Column_List" />
         FROM menu
         <where>
             <if test="query.name != null and query.name != ''">

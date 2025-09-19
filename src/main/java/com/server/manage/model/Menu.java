@@ -56,4 +56,22 @@ public class Menu extends BaseEntity {
      */
     @TableField("url")
     private String url;
+
+    /**
+     * 菜单图标
+     */
+    @TableField("icon")
+    private String icon;
+
+    /**
+     * 前端组件路径
+     */
+    @TableField("path")
+    private String path;
+
+    /**
+     * 额外元数据 (JSON格式)
+     */
+    @TableField("meta")
+    private String meta;
 }
